@@ -19,6 +19,21 @@ export default function App() {
 
   const [msg, setMsg] = useState("");
 
+  // Cart state (must be here, NOT inside if(user))
+  const [cartItems, setCartItems] = useState([]);
+
+  function addDemoProduct() {
+    setCartItems((c) => [
+      ...c,
+      {
+        id: `demo-${c.length + 1}`,
+        title: "Demo Product",
+        price: 10,
+        qty: 1,
+      },
+    ]);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
@@ -30,10 +45,10 @@ export default function App() {
           password,
           profile: { name, address },
         });
-        setMsg("Registered successfully ✅");
+        setMsg("Registered successfully");
       } else {
         await loginUser({ email, password });
-        setMsg("Logged in ✅");
+        setMsg("Logged in");
       }
     } catch (err) {
       setMsg(err?.message || "Something went wrong");
@@ -42,29 +57,33 @@ export default function App() {
 
   if (loading) return <p style={{ padding: 16 }}>Loading...</p>;
 
-  // ✅ LOGGED IN VIEW
+  //  LOGGED IN VIEW
   if (user) {
-    // ✅ IMPORTANT: declare demoCart here (NOT inside JSX)
-    const demoCart = [
-      { id: "demo1", title: "Demo Product 1", price: 10, qty: 2 },
-      { id: "demo2", title: "Demo Product 2", price: 5, qty: 1 },
-    ];
-
     return (
       <div>
         <div style={{ padding: 16 }}>
-          <h1>✅ Logged in</h1>
+          <h1> Logged in</h1>
           <p>
             <b>Email:</b> {user.email}
           </p>
 
           <button onClick={logoutUser}>Logout</button>
 
+          {/*  Cart demo section (for integration test) */}
+          <div style={{ marginTop: 12 }}>
+            <h3>Cart demo (for integration test)</h3>
+
+            <button onClick={addDemoProduct}>Add to Cart</button>
+
+            <p data-testid="cart-count">Cart Items: {cartItems.length}</p>
+          </div>
+
+          {/*  Checkout section */}
           <div style={{ marginTop: 12 }}>
             <h3>Checkout test</h3>
             <CheckoutButton
               userId={user.uid}
-              cartItems={demoCart}
+              cartItems={cartItems}
               onSuccess={(orderId) => console.log("Order created:", orderId)}
             />
           </div>
@@ -76,7 +95,7 @@ export default function App() {
     );
   }
 
-  // ✅ LOGGED OUT VIEW
+  //  LOGGED OUT VIEW
   return (
     <div style={{ padding: 16, maxWidth: 420 }}>
       <h1>{mode === "register" ? "Register" : "Login"}</h1>
